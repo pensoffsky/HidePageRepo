@@ -1,32 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<meta charset="UTF-8" />
-	<title>pagehide listener</title>
+    <meta charset="UTF-8" />
+    <title>pagehide listener</title>
 </head>
 <body>
 <h1>pagehide test</h1>
 <p>Open DevTools → Network and navigate away from this page.</p>
 
 <script>
-	window.addEventListener("pagehide", function (event) {
-	  const payload = {
-		event: "pagehide",
-		persisted: event.persisted,
-		timestamp: Date.now(),
-		url: location.href
-	  };
+    window.addEventListener("pagehide", function (event) {
+      const payload = {
+        event: "pagehide",
+        persisted: event.persisted,
+        timestamp: Date.now(),
+        url: location.href
+      };
 
-	  // Use sendBeacon to reliably send data during page unload
-	  const blob = new Blob([JSON.stringify(payload)], {
-		type: "application/json"
-	  });
-
-	  navigator.sendBeacon(
-		"https://webhook.site/83d8c268-dd19-40a6-8d8f-838b15e5a954",
-		blob
-	  );
-	});
+      fetch("https://webhook.site/83d8c268-dd19-40a6-8d8f-838b15e5a954", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload),
+        keepalive: true // important for unload
+      }).catch(function () {
+        // ignore errors during unload
+      });
+    });
 </script>
 </body>
 </html>
