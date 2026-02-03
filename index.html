@@ -2,38 +2,59 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
-    <title>pagehide listener</title>
+    <title>Lifecycle Events Test</title>
 </head>
 <body>
-<h1>pagehide test</h1>
-<p>Open DevTools → Network and navigate away from this page.</p>
+<h1>Page Exit Events Test</h1>
+<p>1. Open your Webhook.site dashboard.</p>
+<p>2. Try switching tabs, minimizing the window, or closing the tab.</p>
 
-<button id="sendBtn">Send button request</button>
+<button id="sendBtn">Send manual request</button>
 
 <script>
     const ENDPOINT = "https://webhook.site/83d8c268-dd19-40a6-8d8f-838b15e5a954";
 
     function sendText(bodyText) {
+      console.log("Attempting to send:", bodyText);
+
       fetch(ENDPOINT, {
         method: "POST",
         headers: {
           "Content-Type": "text/plain"
         },
         body: bodyText,
-        keepalive: true
+        keepalive: true // RESTORED: Allows request to outlive the page
       }).catch(function () {
         // ignore errors
       });
     }
 
-    // Button click request
+    // 1. Manual Trigger
     document.getElementById("sendBtn").addEventListener("click", function () {
-      sendText("Button request");
+      sendText("Button request clicked");
     });
 
-    // pagehide request
-    window.addEventListener("pagehide", function () {
-      sendText("pagehide event");
+    // 2. Visibility Change
+    document.addEventListener('visibilitychange', function() {
+      if (document.visibilityState === 'hidden') {
+        sendText("visibilitychange event (hidden)");
+      }
+    });
+
+    // 3. Pagehide
+    window.addEventListener("pagehide", function (event) {
+      const type = event.persisted ? "pagehide (cached)" : "pagehide (destroyed)";
+      sendText(type);
+    });
+
+    // 4. BeforeUnload
+    window.addEventListener("beforeunload", function () {
+      sendText("beforeunload event");
+    });
+
+    // 5. Unload (Legacy)
+    window.addEventListener("unload", function () {
+      sendText("unload event");
     });
 </script>
 </body>
